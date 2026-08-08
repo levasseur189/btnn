@@ -62,8 +62,11 @@ clear_old();
     </div>
     <div class="col-12 col-lg-8">
         <div class="card">
-            <div class="card-header"><span><i class="bi bi-clock-history text-primary me-2"></i>Riwayat Barang Keluar</span></div>
-            <div class="card-body">
+            <div class="card-header">
+                <span><i class="bi bi-clock-history text-primary me-2"></i>Riwayat Barang Keluar</span>
+                <button class="btn btn-sm btn-soft" id="refreshKeluar"><i class="bi bi-arrow-clockwise me-1"></i> Refresh</button>
+            </div>
+            <div class="card-body" id="keluarBody">
                 <?php if (empty($rows)): ?>
                     <div class="empty-state"><?= empty_state_svg('box') ?><h5>Belum ada transaksi keluar</h5></div>
                 <?php else: ?>
@@ -106,6 +109,27 @@ sel.addEventListener('change', function() {
         info.textContent = 'Pilih barang untuk melihat stok tersedia.';
     }
 });
+function refreshSection(btnId, bodyId, type) {
+    var btn = document.getElementById(btnId);
+    var body = document.getElementById(bodyId);
+    if (!btn || !body) return;
+    btn.addEventListener('click', function() {
+        var icon = btn.querySelector('i');
+        if (icon) icon.classList.add('spin');
+        fetch(BASE_URL + '/pages/api-riwayat.php?type=' + type, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.text(); })
+            .then(function(html) {
+                body.innerHTML = html;
+                if (window.jQuery && window.DataTable) {
+                    jQuery(body).find('.datatable').DataTable({ language: { sEmptyTable: 'Tidak ada data tersedia', sInfo: 'Menampilkan _START_ - _END_ dari _TOTAL_ data', sInfoEmpty: 'Menampilkan 0 data', sInfoFiltered: '(disaring dari _MAX_ data)', sLengthMenu: 'Tampilkan _MENU_ data', sLoadingRecords: 'Memuat...', sProcessing: 'Memproses...', sSearch: 'Cari:', sZeroRecords: 'Data tidak ditemukan', oPaginate: { sFirst: 'Pertama', sLast: 'Terakhir', sNext: 'Selanjutnya', sPrevious: 'Sebelumnya' } }, pageLength: 10, responsive: true, autoWidth: false });
+                }
+                if (window.showToast) showToast('success', 'Riwayat diperbarui');
+            })
+            .catch(function() { if (window.showToast) showToast('error', 'Gagal memuat ulang'); })
+            .finally(function() { if (icon) icon.classList.remove('spin'); });
+    });
+}
+refreshSection('refreshKeluar', 'keluarBody', 'keluar');
 ";
 require_once __DIR__ . '/../includes/footer.php';
 ?>
