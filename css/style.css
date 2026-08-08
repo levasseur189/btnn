@@ -393,7 +393,6 @@ body {
 .page-title-bar .breadcrumb { margin-bottom: 0; font-size: .85rem; }
 .breadcrumb a { color: var(--primary); text-decoration: none; }
 .chart-container { position: relative; height: 280px; }
-.qr-print-area { display: inline-block; padding: 16px; background: #fff; border: 1px solid var(--border); border-radius: 8px; text-align: center; }
 .loading-overlay {
     position: fixed; inset: 0;
     background: rgba(255,255,255,.6);

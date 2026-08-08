@@ -11,7 +11,6 @@ Aplikasi web manajemen inventaris gudang Bank BTN, dibangun dengan **PHP Native 
   - SweetAlert2 (notifikasi)
   - DataTables (tabel interaktif)
   - Chart.js (grafik)
-  - QRCode.js (QR code barang)
   - PhpSpreadsheet (export Excel)
   - DomPDF (export PDF)
 
@@ -67,7 +66,7 @@ ims-btn/
 ## Fitur
 
 - Dashboard dengan kartu statistik + grafik (Chart.js)
-- CRUD Data Barang + QR Code + Detail + Export Excel/PDF
+- CRUD Data Barang + Detail + Export Excel/PDF
 - CRUD Kategori & Supplier
 - Barang Masuk (stok bertambah otomatis, upload bukti)
 - Barang Keluar (stok berkurang otomatis, validasi stok)

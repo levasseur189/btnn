@@ -55,9 +55,7 @@ $st = status_stok($barang['stok'], $barang['minimal_stok']);
                 <?php else: ?>
                     <div class="d-flex align-items-center justify-content-center bg-light rounded mb-3" style="height:240px"><i class="bi bi-image fs-1 text-muted"></i></div>
                 <?php endif; ?>
-                <div id="qrcode" class="qr-print-area mx-auto d-inline-block"></div>
                 <p class="text-muted small mt-2">Kode: <strong><?= e($barang['kode']) ?></strong></p>
-                <button class="btn btn-soft btn-sm no-print" onclick="window.print()"><i class="bi bi-printer me-1"></i> Cetak QR</button>
             </div>
         </div>
     </div>
@@ -133,11 +131,5 @@ $st = status_stok($barang['stok'], $barang['minimal_stok']);
 </div>
 
 <?php
-$extra_js = "
-new QRCode(document.getElementById('qrcode'), {
-    text: '" . BASE_URL . "/pages/detail-barang.php?kode=" . urlencode($barang['kode']) . "',
-    width: 160, height: 160
-});
-";
 require_once __DIR__ . '/../includes/footer.php';
 ?>
