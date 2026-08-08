@@ -5,7 +5,6 @@
         </footer>
     </div>
 </div>
-<?php if (!empty($_extra_html)) echo $_extra_html; ?>
 
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
