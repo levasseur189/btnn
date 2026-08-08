@@ -155,8 +155,9 @@ $menipis = db()->query("
         <div class="card" id="cardAktivitas">
             <div class="card-header">
                 <span><i class="bi bi-clock-history text-primary me-2"></i>Aktivitas Terbaru</span>
+                <button class="btn btn-sm btn-soft" id="refreshAktivitas"><i class="bi bi-arrow-clockwise me-1"></i> Refresh</button>
             </div>
-            <div class="card-body">
+            <div class="card-body" id="aktivitasBody">
                 <?php if (empty($aktivitas)): ?>
                     <div class="empty-state"><?= empty_state_svg('clock') ?><h5>Belum ada aktivitas</h5></div>
                 <?php else: ?>
@@ -228,6 +229,25 @@ new Chart(document.getElementById('chartKategoriCanvas'), {
     data: { labels: katLabels, datasets: [{ label: 'Jumlah Barang', data: katData, backgroundColor: '#0066B3', borderRadius: 8 }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
 });
+function refreshSection(btnId, bodyId, type) {
+    var btn = document.getElementById(btnId);
+    var body = document.getElementById(bodyId);
+    if (!btn || !body) return;
+    btn.addEventListener('click', function() {
+        var icon = btn.querySelector('i');
+        if (icon) icon.classList.add('spin');
+        fetch(BASE_URL + '/pages/api-riwayat.php?type=' + type, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.text(); })
+            .then(function(html) {
+                body.innerHTML = html;
+                if (window.showToast) showToast('success', 'Riwayat diperbarui');
+            })
+            .catch(function() { if (window.showToast) showToast('error', 'Gagal memuat ulang'); })
+            .finally(function() { if (icon) icon.classList.remove('spin'); });
+    });
+}
+refreshSection('refreshAktivitas', 'aktivitasBody', 'aktivitas');
 ";
+
 require_once __DIR__ . '/../includes/footer.php';
 ?>
