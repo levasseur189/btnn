@@ -40,8 +40,14 @@ $suppliers = db()->query('SELECT id, nama FROM supplier ORDER BY nama ASC')->fet
             <a href="<?= BASE_URL ?>/pages/barang-form.php" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus-lg"></i> Tambah Barang
             </a>
+            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
+                <i class="bi bi-upload"></i> Import Excel
+            </button>
+            <a href="<?= BASE_URL ?>/export/export-template-barang.php" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-download"></i> Template
+            </a>
             <a href="<?= BASE_URL ?>/export/export-barang.php?type=excel" class="btn btn-success btn-sm">
-                <i class="bi bi-file-earmark-excel"></i> Excel
+                <i class="bi bi-file-earmark-excel"></i> Export Excel
             </a>
             <a href="<?= BASE_URL ?>/export/export-barang.php?type=pdf" class="btn btn-danger btn-sm" target="_blank">
                 <i class="bi bi-file-earmark-pdf"></i> PDF
@@ -177,5 +183,40 @@ document.getElementById('resetFilter').addEventListener('click', function() {
     dtBarang.search('').draw();
 });
 ";
+
+$_extra_html = <<<HTML
+<div class="modal fade" id="importModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background:#0066B3;color:#fff">
+        <h5 class="modal-title"><i class="bi bi-upload me-2"></i>Import Data Barang dari Excel</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="<?= BASE_URL ?>/actions/barang-import.php" method="post" enctype="multipart/form-data">
+        <div class="modal-body">
+          <div class="alert alert-info py-2">
+            <i class="bi bi-info-circle"></i> Gunakan template Excel untuk format yang sesuai.
+            Kategori & Supplier harus sudah ada di sistem. Kode yang sudah ada akan dilewati.
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">File Excel (.xlsx / .xls)</label>
+            <input type="file" name="file_excel" class="form-control" accept=".xlsx,.xls" required>
+          </div>
+          <div class="d-flex gap-2">
+            <a href="<?= BASE_URL ?>/export/export-template-barang.php" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-download"></i> Download Template
+            </a>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-upload"></i> Import Sekarang</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+HTML;
+
 require_once __DIR__ . '/../includes/footer.php';
 ?>
