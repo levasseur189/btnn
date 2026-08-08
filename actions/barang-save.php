@@ -48,8 +48,8 @@ if ($id) {
     log_aktivitas('Edit', 'Barang', 'Mengedit barang: ' . $nama);
     set_flash('success', 'Barang berhasil diperbarui.');
 } else {
-    $stmt = db()->prepare('INSERT INTO barang (kode, nama, kategori_id, supplier_id, lokasi_rak, satuan, stok, minimal_stok, foto, qr_code, deskripsi) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
-    $stmt->execute([$kode, $nama, $kategori_id, $supplier_id, $lokasi_rak, $satuan, $stok, $minimal_stok, $foto, $kode, $deskripsi]);
+    $stmt = db()->prepare('INSERT INTO barang (kode, nama, kategori_id, supplier_id, lokasi_rak, satuan, stok, minimal_stok, foto, deskripsi) VALUES (?,?,?,?,?,?,?,?,?,?)');
+    $stmt->execute([$kode, $nama, $kategori_id, $supplier_id, $lokasi_rak, $satuan, $stok, $minimal_stok, $foto, $deskripsi]);
     log_aktivitas('Tambah', 'Barang', 'Menambah barang: ' . $nama);
     set_flash('success', 'Barang berhasil ditambahkan.');
 }

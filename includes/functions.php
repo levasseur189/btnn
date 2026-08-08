@@ -95,10 +95,6 @@ function generate_kode(string $prefix, string $table, string $column): string {
     return $prefix . str_pad((string)$num, 4, '0', STR_PAD_LEFT);
 }
 
-function qr_url(string $kode): string {
-    return BASE_URL . '/pages/detail-barang.php?kode=' . urlencode($kode);
-}
-
 function flash(string $key): ?string {
     $val = $_SESSION['_flash'][$key] ?? null;
     unset($_SESSION['_flash'][$key]);

@@ -28,7 +28,7 @@ clear_old();
 </div>
 
 <div class="row g-3">
-    <div class="col-12 col-lg-8">
+    <div class="col-12">
         <div class="card">
             <div class="card-header"><span><i class="bi bi-box text-primary me-2"></i><?= $id ? 'Edit Data Barang' : 'Tambah Data Barang' ?></span></div>
             <div class="card-body">
@@ -102,24 +102,8 @@ clear_old();
             </div>
         </div>
     </div>
-    <div class="col-12 col-lg-4">
-        <div class="card">
-            <div class="card-header"><span><i class="bi bi-qr-code text-primary me-2"></i>QR Code</span></div>
-            <div class="card-body text-center">
-                <div id="qrcode" class="qr-print-area mx-auto"></div>
-                <p class="text-muted small mt-2">QR otomatis dibuat dari kode barang. Pindai untuk membuka detail.</p>
-            </div>
-        </div>
-    </div>
 </div>
 
 <?php
-$extra_js = "
-var kode = " . json_encode($barang['kode'] ?? $kode_otomatis) . ";
-new QRCode(document.getElementById('qrcode'), {
-    text: '" . BASE_URL . "/pages/detail-barang.php?kode=' + encodeURIComponent(kode),
-    width: 160, height: 160
-});
-";
 require_once __DIR__ . '/../includes/footer.php';
 ?>
