@@ -2,6 +2,12 @@
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/functions.php';
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+
 $periode = $_GET['periode'] ?? 'bulanan';
 $tipe = $_GET['tipe'] ?? 'all';
 $tanggal = $_GET['tanggal'] ?? date('Y-m-d');
@@ -80,54 +86,151 @@ if ($format === 'pdf') {
     $dompdf->render();
     $dompdf->stream('laporan-' . $periode . '-' . date('Ymd') . '.pdf', ['Attachment' => false]);
     exit;
-} else {
-    require_once __DIR__ . '/../vendor/autoload.php';
-    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-    $sheet->setTitle('Laporan');
-    $sheet->mergeCells('A1:F1');
-    $sheet->setCellValue('A1', 'Laporan Transaksi IMS BTN - Periode ' . $judul_periode[$periode] . ' - ' . date('d/m/Y'));
-    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(13);
-    $row = 3;
-    if ($tipe === 'all' || $tipe === 'masuk') {
-        $sheet->setCellValue('A' . $row, 'BARANG MASUK'); $sheet->getStyle('A' . $row)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('22C55E')); $row++;
-        $headers = ['Tanggal', 'Kode', 'Barang', 'Jumlah', 'Supplier', 'Invoice'];
-        $col = 'A';
-        foreach ($headers as $h) {
-            $sheet->setCellValue($col . $row, $h);
-            $sheet->getStyle($col . $row)->getFont()->setBold(true);
-            $sheet->getStyle($col . $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('22C55E');
-            $sheet->getStyle($col . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFFFFF'));
-            $col++;
-        }
-        $row++;
-        foreach ($masuk as $r) {
-            $sheet->fromArray([date('d/m/Y', strtotime($r['tanggal'])), $r['kode'], $r['nama'], $r['jumlah'], $r['supplier_nama'] ?? '-', $r['nomor_invoice'] ?? '-'], null, 'A' . $row);
-            $row++;
-        }
-        $row += 2;
-    }
-    if ($tipe === 'all' || $tipe === 'keluar') {
-        $sheet->setCellValue('A' . $row, 'BARANG KELUAR'); $sheet->getStyle('A' . $row)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('EF4444')); $row++;
-        $headers = ['Tanggal', 'Kode', 'Barang', 'Jumlah', 'Tujuan'];
-        $col = 'A';
-        foreach ($headers as $h) {
-            $sheet->setCellValue($col . $row, $h);
-            $sheet->getStyle($col . $row)->getFont()->setBold(true);
-            $sheet->getStyle($col . $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('EF4444');
-            $sheet->getStyle($col . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFFFFF'));
-            $col++;
-        }
-        $row++;
-        foreach ($keluar as $r) {
-            $sheet->fromArray([date('d/m/Y', strtotime($r['tanggal'])), $r['kode'], $r['nama'], $r['jumlah'], $r['tujuan'] ?? '-'], null, 'A' . $row);
-            $row++;
-        }
-    }
-    foreach (range('A', 'F') as $c) $sheet->getColumnDimension($c)->setAutoSize(true);
-    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment;filename="laporan-' . $periode . '-' . date('Ymd') . '.xlsx"');
-    $writer->save('php://output');
-    exit;
 }
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$spreadsheet = new Spreadsheet();
+$sheet = $spreadsheet->getActiveSheet();
+$sheet->setTitle('Laporan');
+
+$thin = ['borderStyle' => Border::BORDER_THIN, 'color' => ['RGB' => 'D1D5DB']];
+$borderAll = ['borders' => ['top' => $thin, 'bottom' => $thin, 'left' => $thin, 'right' => $thin]];
+
+// Title row
+$lastCol = ($tipe === 'keluar') ? 'E' : 'F';
+$sheet->mergeCells('A1:' . $lastCol . '1');
+$sheet->setCellValue('A1', 'LAPORAN TRANSAKSI IMS BTN - Periode ' . strtoupper($judul_periode[$periode]));
+$sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14)->setColor(new Color('0066B3'));
+$sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+$sheet->getRowDimension('1')->setRowHeight(28);
+
+// Subtitle
+$sheet->mergeCells('A2:' . $lastCol . '2');
+$sheet->setCellValue('A2', 'Dicetak: ' . date('d/m/Y H:i:s'));
+$sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+$sheet->getStyle('A2')->getFont()->setItalic(true)->setSize(10)->setColor(new Color('6B7280'));
+$sheet->getRowDimension('2')->setRowHeight(20);
+
+$row = 4;
+
+if ($tipe === 'all' || $tipe === 'masuk') {
+    // Section header
+    $sheet->mergeCells('A' . $row . ':F' . $row);
+    $sheet->setCellValue('A' . $row, 'BARANG MASUK');
+    $sheet->getStyle('A' . $row)->getFont()->setBold(true)->setSize(12)->setColor(new Color('22C55E'));
+    $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    $sheet->getRowDimension($row)->setRowHeight(22);
+    $row++;
+
+    // Column headers
+    $headers = ['Tanggal', 'Kode', 'Nama Barang', 'Jumlah', 'Supplier', 'Invoice'];
+    $col = 'A';
+    foreach ($headers as $h) {
+        $sheet->setCellValue($col . $row, $h);
+        $sheet->getStyle($col . $row)->getFont()->setBold(true)->setColor(new Color('FFFFFF'));
+        $sheet->getStyle($col . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('22C55E');
+        $sheet->getStyle($col . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle($col . $row)->applyFromArray($borderAll);
+        $col++;
+    }
+    $sheet->getRowDimension($row)->setRowHeight(22);
+    $row++;
+
+    $dataStart = $row;
+    $no = 1;
+    foreach ($masuk as $r) {
+        $sheet->setCellValue('A' . $row, date('d/m/Y', strtotime($r['tanggal'])));
+        $sheet->setCellValue('B' . $row, $r['kode']);
+        $sheet->setCellValue('C' . $row, $r['nama']);
+        $sheet->setCellValue('D' . $row, (int)$r['jumlah']);
+        $sheet->setCellValue('E' . $row, $r['supplier_nama'] ?? '-');
+        $sheet->setCellValue('F' . $row, $r['nomor_invoice'] ?? '-');
+
+        foreach (range('A', 'F') as $c) $sheet->getStyle($c . $row)->applyFromArray($borderAll);
+        $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        if ($no % 2 === 0) {
+            foreach (range('A', 'F') as $c)
+                $sheet->getStyle($c . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('F0FDF4');
+        }
+        $row++; $no++;
+    }
+
+    // Total row
+    $sheet->setCellValue('C' . $row, 'TOTAL MASUK');
+    $sheet->getStyle('C' . $row)->getFont()->setBold(true);
+    $sheet->getStyle('C' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+    $sheet->setCellValue('D' . $row, array_sum(array_column($masuk, 'jumlah')));
+    $sheet->getStyle('D' . $row)->getFont()->setBold(true);
+    $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+    foreach (range('A', 'F') as $c) {
+        $sheet->getStyle($c . $row)->applyFromArray($borderAll);
+        $sheet->getStyle($c . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('DCFCE7');
+    }
+    $row += 2;
+}
+
+if ($tipe === 'all' || $tipe === 'keluar') {
+    $sheet->mergeCells('A' . $row . ':E' . $row);
+    $sheet->setCellValue('A' . $row, 'BARANG KELUAR');
+    $sheet->getStyle('A' . $row)->getFont()->setBold(true)->setSize(12)->setColor(new Color('EF4444'));
+    $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    $sheet->getRowDimension($row)->setRowHeight(22);
+    $row++;
+
+    $headers = ['Tanggal', 'Kode', 'Nama Barang', 'Jumlah', 'Tujuan'];
+    $col = 'A';
+    foreach ($headers as $h) {
+        $sheet->setCellValue($col . $row, $h);
+        $sheet->getStyle($col . $row)->getFont()->setBold(true)->setColor(new Color('FFFFFF'));
+        $sheet->getStyle($col . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('EF4444');
+        $sheet->getStyle($col . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle($col . $row)->applyFromArray($borderAll);
+        $col++;
+    }
+    $sheet->getRowDimension($row)->setRowHeight(22);
+    $row++;
+
+    $no = 1;
+    foreach ($keluar as $r) {
+        $sheet->setCellValue('A' . $row, date('d/m/Y', strtotime($r['tanggal'])));
+        $sheet->setCellValue('B' . $row, $r['kode']);
+        $sheet->setCellValue('C' . $row, $r['nama']);
+        $sheet->setCellValue('D' . $row, (int)$r['jumlah']);
+        $sheet->setCellValue('E' . $row, $r['tujuan'] ?? '-');
+
+        foreach (range('A', 'E') as $c) $sheet->getStyle($c . $row)->applyFromArray($borderAll);
+        $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        if ($no % 2 === 0) {
+            foreach (range('A', 'E') as $c)
+                $sheet->getStyle($c . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FEF2F2');
+        }
+        $row++; $no++;
+    }
+
+    // Total row
+    $sheet->setCellValue('C' . $row, 'TOTAL KELUAR');
+    $sheet->getStyle('C' . $row)->getFont()->setBold(true);
+    $sheet->getStyle('C' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+    $sheet->setCellValue('D' . $row, array_sum(array_column($keluar, 'jumlah')));
+    $sheet->getStyle('D' . $row)->getFont()->setBold(true);
+    $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+    foreach (range('A', 'E') as $c) {
+        $sheet->getStyle($c . $row)->applyFromArray($borderAll);
+        $sheet->getStyle($c . $row)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FEE2E2');
+    }
+}
+
+// Column widths
+$widths = ['A' => 14, 'B' => 15, 'C' => 30, 'D' => 12, 'E' => 20, 'F' => 18];
+foreach ($widths as $c => $w) $sheet->getColumnDimension($c)->setWidth($w);
+
+$sheet->freezePane('A4');
+
+$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+header('Content-Disposition: attachment;filename="laporan-' . $periode . '-' . date('Ymd') . '.xlsx"');
+$writer->save('php://output');
+exit;
