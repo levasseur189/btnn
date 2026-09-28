@@ -37,9 +37,6 @@ ims-btn/
 ├── login.php         # Halaman login
 ├── logout.php        # Logout
 ├── index.php         # Entry point
-├── manifest.json     # PWA manifest
-├── sw.js             # Service Worker (PWA offline)
-├── offline.html      # Halaman offline fallback
 └── composer.json
 ```
 
