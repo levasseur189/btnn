@@ -32,12 +32,19 @@ function status_stok(int $stok, int $minimal): string {
 }
 
 function status_badge(string $status): string {
-    return match ($status) {
-        'aman' => '<span class="badge bg-success-subtle text-success-emerald"><i class="bi bi-check-circle"></i> Aman</span>',
-        'menipis' => '<span class="badge bg-warning-subtle text-warning"><i class="bi bi-exclamation-triangle"></i> Menipis</span>',
-        'habis' => '<span class="badge bg-danger-subtle text-danger"><i class="bi bi-x-circle"></i> Habis</span>',
-        default => $status,
-    };
+    switch ($status) {
+        case 'aman':
+            return '<span class="badge bg-success-subtle text-success-emerald"><i class="bi bi-check-circle"></i> Aman</span>';
+
+        case 'menipis':
+            return '<span class="badge bg-warning-subtle text-warning"><i class="bi bi-exclamation-triangle"></i> Menipis</span>';
+
+        case 'habis':
+            return '<span class="badge bg-danger-subtle text-danger"><i class="bi bi-x-circle"></i> Habis</span>';
+
+        default:
+            return $status;
+    }
 }
 
 function empty_state_svg(string $type = 'default'): string {

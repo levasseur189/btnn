@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    // Sidebar toggle
+    
     var toggle = document.getElementById('sidebarToggle');
     var sidebar = document.getElementById('sidebar');
     if (toggle && sidebar) {

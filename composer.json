@@ -3,11 +3,11 @@
     "description": "Inventory Management System - Bank BTN",
     "type": "project",
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.0",
         "phpoffice/phpspreadsheet": "^2.0",
         "dompdf/dompdf": "^2.0"
     },
     "config": {
-        "vendor-dir": "vendor/"
+        "vendor-dir": "vendor"
     }
 }
